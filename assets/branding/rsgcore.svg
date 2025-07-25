@@ -1,0 +1,22 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="300" height="100" viewBox="0 0 300 100">
+  <defs>
+    <linearGradient id="bottom-gradient" x1="50%" y1="100%" x2="50%" y2="0%">
+      <stop offset="53%" stop-color="#a12020c2" />
+      <stop offset="65%" stop-color="#801818ff" />
+    </linearGradient>
+    <clipPath id="clip-top">
+      <polygon points="0,0 300,0 300,48 0,58" />
+    </clipPath>
+    <clipPath id="clip-bottom">
+      <polygon points="0,60 300,50 300,100 0,100" />
+    </clipPath>
+  </defs>
+  <g font-family="Oswald, Impact, sans-serif" font-size="60" font-weight="700" text-transform="uppercase" text-anchor="middle">
+    <text x="50%" y="70" fill="#801818ff" clip-path="url(#clip-top)">
+      RSG Core
+    </text>
+    <text x="50%" y="70" fill="url(#bottom-gradient)" clip-path="url(#clip-bottom)" transform="translateX(-2)">
+      RSG Core
+    </text>
+  </g>
+</svg>
