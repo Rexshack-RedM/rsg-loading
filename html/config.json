@@ -1,0 +1,17 @@
+{
+  "background_image": "images/background.jpeg",
+  "background_dim": 0.45,
+  "text": {
+    "brand_title": "RSG Framework",
+    "brand_subtitle": "R E D E M P T I O N  A W A I T S",
+    "status_loading": "Saddling up…",
+    "status_ready": "Ready.",
+    "footer_resource_name": "rsg-loading",
+    "tips": [
+      "Tip: RSG Framwork is probably the best RedM framework in the world.",
+      "Tip: Join our gaming community : RSG Network.",
+      "Tip: Community is everything, be part of it."
+    ]
+  },
+  "tip_interval_seconds": 5
+}

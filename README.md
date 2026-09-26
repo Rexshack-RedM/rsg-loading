@@ -1,87 +1,122 @@
-<img width="2948" height="497" alt="rsg_framework" src="https://github.com/user-attachments/assets/638791d8-296d-4817-a596-785325c1b83a" />
+# rsg-loading
 
-# 🎬 rsg-loading
-**Custom RedM loading screen for RSG Core framework.**
+A clean, configurable loading screen for RedM servers running the RSG Framework.
 
-![Platform](https://img.shields.io/badge/platform-RedM-darkred)
-![License](https://img.shields.io/badge/license-GPL--3.0-green)
+![RedM](https://img.shields.io/badge/RedM-rdr3-red) ![Lua](https://img.shields.io/badge/Lua-5.4-blue) ![Version](https://img.shields.io/badge/version-1.0.0-green)
 
-> A stylish and lightweight loading screen using Vue 3 and Quasar.  
-> Features animated background video, background music, and RSG Framework branding.
+## Features
 
----
+- Custom background image with adjustable dim
+- Branded title and subtitle
+- Live progress bar driven by RedM's native `loadFraction` events
+- Rotating tips with fade transition and configurable interval
+- Status text and in-game clock
+- Simulated progress fallback, so it previews correctly in a normal browser
+- Safety net auto-close after 45 seconds if the game never signals completion
+- Everything configured through JSON — no Lua edits needed
 
-## 🛠️ Dependencies
-- **None required** — this resource runs standalone.  
-- Compatible with **RSG Core** servers.  
+## Installation
 
-**License:** GPL‑3.0
-
----
-
-## ✨ Features
-- 🎥 **Animated video background** (default: `assets/video/freestockvideo.mp4`).  
-- 🎧 **Background music** (default: `assets/audio/noncopyright.mp3`, looping enabled).  
-- 🖼️ **Custom branding** — RSG logo and framework visuals.  
-- 🧩 **Vue 3 + Quasar UI framework** for smooth transitions.  
-- 🖱️ **Visible cursor** and **manual loadscreen shutdown**.  
-- 🌍 **Easily customizable HTML/CSS structure.**
-
----
-
-## ⚙️ Configuration (`fxmanifest.lua`)
-```lua
-fx_version 'cerulean'
-game 'rdr3'
-rdr3_warning 'This is a custom RedM loading screen.'
-
-loadscreen 'html/index.html'
-loadscreen_cursor 'yes'
-loadscreen_manual_shutdown 'yes'
-
-files {
-    'html/index.html',
-    'html/assets/**',
-    'html/assets/audio/**',
-    'html/assets/video/**',
-    'html/assets/images/**',
-    'html/app.js',
-    'html/styles.css'
-}
-```
-
-> Edit the `html/assets` folder to replace the **video**, **audio**, or **images** with your own branding.
-
----
-
-## 🎨 Customization
-- Replace the background video:  
-  `html/assets/video/freestockvideo.mp4`
-- Replace the music file:  
-  `html/assets/audio/noncopyright.mp3`
-- Adjust volume and autoplay behavior in `app.js`.
-- Change text, progress bar, and style via `index.html` and `styles.css`.
-
----
-
-## 📂 Installation
-1. Copy the folder `rsg-loading` into your `resources/[rsg]` directory.  
-2. In your `server.cfg`, add:
+1. Place the `rsg-loading` folder in your server's `resources` directory.
+2. Add it to your `server.cfg`:
    ```cfg
    ensure rsg-loading
    ```
-3. (Optional) Replace video/audio assets with your own files.  
-4. Restart your RedM server.
+3. Restart the server.
 
----
+> Only one resource can provide a `loadscreen`. Remove or stop any other loading screen resource.
 
-## 💡 Example Preview
-The default setup shows the RSG Framework logo, an animated video background, and looping music during player connection.
+## Configuration
 
----
+All settings live in `html/config.json`:
 
-## 💎 Credits
-- **qb-loading** — Original base script  
-- **RSG / Rexshack‑RedM** — adaptation & maintenance  
-- **Community contributors & translators**  
-- License: GPL‑3.0
+```json
+{
+  "background_image": "images/background.jpeg",
+  "background_dim": 0.45,
+  "text": {
+    "brand_title": "RSG Framework",
+    "brand_subtitle": "R E D E M P T I O N  A W A I T S",
+    "status_loading": "Saddling up…",
+    "status_ready": "Ready.",
+    "footer_resource_name": "rsg-loading",
+    "tips": [
+      "Tip: Community is everything, be part of it."
+    ]
+  },
+  "tip_interval_seconds": 5
+}
+```
+
+| Key | Description |
+| --- | --- |
+| `background_image` | Path relative to `html/`, or a full URL. Falls back to a dark gradient if missing. |
+| `background_dim` | Darkness overlay on the background, `0` (none) to `1` (black). |
+| `text.brand_title` | Main heading. |
+| `text.brand_subtitle` | Line under the heading. |
+| `text.status_loading` | Status text while loading. |
+| `text.status_ready` | Status text when loading completes. |
+| `text.footer_resource_name` | Text shown in the footer. |
+| `text.tips` | Array of tips rotated during loading. |
+| `tip_interval_seconds` | Seconds between tip changes. |
+
+### Text priority
+
+Text is merged in this order (later wins):
+
+1. Built-in fallback in `script.js`
+2. `html/locales/en.json`
+3. The `text` block in `html/config.json`
+
+For a simple setup, just edit `config.json`. Use `locales/en.json` as your base language file and leave keys out of `config.json` if you want the locale to apply.
+
+### Changing the background
+
+Drop your image into `html/images/` and update `background_image` in `config.json`. Any file in `html/images/` is included automatically by the manifest. Keep images reasonably sized (a compressed 1920×1080 JPEG is ideal) so the screen appears quickly.
+
+## How it closes
+
+The manifest sets `loadscreen_manual_shutdown 'yes'`. The screen closes when:
+
+- it receives an `endLoading` NUI message (`eventName` or `type`), or
+- the 45-second safety timeout fires.
+
+It then calls `shutdownLoadingScreenNui` itself. If you'd rather close it from Lua once the player has spawned or picked a character, add a client script such as:
+
+```lua
+AddEventHandler('RSGCore:Client:OnPlayerLoaded', function()
+    ShutdownLoadingScreenNui()
+end)
+```
+
+## Custom status messages
+
+Any NUI message containing a `statusText` string updates the status line, e.g. from a client script:
+
+```lua
+SendLoadingScreenMessage(json.encode({ statusText = 'Loading world…' }))
+```
+
+## Previewing
+
+Open `html/index.html` in a browser (via a local web server so `fetch` can read the JSON files, e.g. `npx serve html`). Progress will be simulated.
+
+## File structure
+
+```
+rsg-loading/
+├── fxmanifest.lua
+└── html/
+    ├── index.html
+    ├── style.css
+    ├── script.js
+    ├── config.json
+    ├── locales/
+    │   └── en.json
+    └── images/
+        └── background.jpeg
+```
+
+## Credits
+
+Created by **RexShack** for the RSG Framework.
