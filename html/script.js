@@ -204,19 +204,25 @@ function themeActive(name, t, now) {
     return today.getTime() >= from && today.getTime() <= to;
   }
   if (!t.start || !t.finish) return false;
-  const cur = (now.getMonth() + 1) * 100 + now.getDate();
+  let cur = (now.getMonth() + 1) * 100 + now.getDate();
+  if (cur === 229 && mmdd(t.finish) === 228) cur = 228; // leap day counts as Feb 28
   const s = mmdd(t.start), f = mmdd(t.finish);
   return s <= f ? cur >= s && cur <= f : cur >= s || cur <= f; // wraps new year
 }
 
 function pickTheme(cfg) {
   const themes = cfg.Themes || {};
+  const seasons = cfg.Seasons || {};
   const mode = String(cfg.Theme || 'auto').toLowerCase();
   if (mode === 'default' || mode === 'none') return null;
-  if (mode !== 'auto') return themes[mode] || null;
+  if (mode !== 'auto') return themes[mode] || seasons[mode] || null;
   const now = new Date();
   for (const name of Object.keys(themes)) {
     if (themeActive(name, themes[name], now)) return themes[name];
+  }
+  if (cfg.UseSeasons === false) return null;
+  for (const name of Object.keys(seasons)) {
+    if (themeActive(name, seasons[name], now)) return seasons[name];
   }
   return null;
 }
@@ -243,15 +249,17 @@ function applyTheme(t, particlesOn) {
 function startParticles(kind) {
   const layer = document.getElementById('particles');
   if (!layer) return;
-  const glyph = { snow: '❄', bats: '🦇', petals: '✿' }[kind];
+  const glyph = { snow: '❄', bats: '🦇', petals: '✿', leaves: '❦', fireflies: '●' }[kind];
   if (!glyph) return;
-  const count = kind === 'snow' ? 45 : kind === 'bats' ? 14 : 28;
+  const count = { snow: 45, bats: 14, petals: 28, leaves: 30, fireflies: 35 }[kind];
   for (let n = 0; n < count; n++) {
     const p = document.createElement('span');
     p.className = 'particle particle-' + kind;
     p.textContent = glyph;
     p.style.left = Math.random() * 100 + 'vw';
-    p.style.fontSize = (kind === 'bats' ? 14 + Math.random() * 16 : 8 + Math.random() * 14) + 'px';
+    p.style.fontSize = (kind === 'bats' ? 14 + Math.random() * 16 : kind === 'fireflies' ? 3 + Math.random() * 4 : 8 + Math.random() * 14) + 'px';
+    if (kind === 'fireflies') p.style.top = 30 + Math.random() * 65 + 'vh';
+    if (kind === 'leaves') p.style.color = ['#c8501e', '#e07a1f', '#d9a028', '#a8321c'][n % 4];
     p.style.opacity = (0.35 + Math.random() * 0.55).toFixed(2);
     p.style.animationDuration = (kind === 'bats' ? 7 + Math.random() * 8 : 9 + Math.random() * 12) + 's';
     p.style.animationDelay = -Math.random() * 20 + 's';

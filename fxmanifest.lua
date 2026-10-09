@@ -7,7 +7,11 @@ lua54 'yes'
 name 'rsg-loading'
 author 'RexShack'
 description 'RSG RedM Loading Screen'
-version '3.0.0'
+version '3.0.1'
+
+server_scripts {
+    'server/versionchecker.lua'
+}
 
 loadscreen 'html/index.html'
 

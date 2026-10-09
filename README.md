@@ -15,6 +15,7 @@ A clean, configurable loading screen for RedM servers running the RSG Framework.
 - Safety net auto-close after 45 seconds if the game never signals completion
 - Seasonal themes for Easter, Halloween and Christmas with their own colours, backgrounds, tips and particle effects (snow, bats, petals)
 - Automatic theme switching by date, including Easter's moving date
+- Winter, spring, summer and autumn themes used the rest of the year when no holiday is active
 - Text and layout configured through JSON, seasonal themes through `config.lua`
 
 ## Installation
@@ -88,9 +89,10 @@ Config.MergeTips = true     -- true = add seasonal tips to your normal tips, fal
 
 | `Config.Theme` | Behaviour |
 | --- | --- |
-| `'auto'` | Uses the theme whose date window contains today, otherwise the normal look. |
+| `'auto'` | Uses the holiday theme whose date window contains today; if none, the matching season theme (when `Config.UseSeasons = true`); otherwise the normal look. |
 | `'default'` | Never uses a seasonal theme. |
-| `'easter'` / `'halloween'` / `'christmas'` | Forces that theme all year. Useful for testing. |
+| `'easter'` / `'halloween'` / `'christmas'` | Forces that holiday theme all year. Useful for testing. |
+| `'winter'` / `'spring'` / `'summer'` / `'autumn'` | Forces that season theme all year. |
 
 ### Default date windows
 
@@ -102,9 +104,20 @@ Config.MergeTips = true     -- true = add seasonal tips to your normal tips, fal
 
 Dates use the player's local clock in `MM-DD` format. A window can wrap the new year, e.g. `start = '12-01', finish = '01-06'`.
 
+### Season themes
+
+When no holiday is active, `Config.Seasons` is checked. Holidays always take priority (so Christmas wins over winter in December). Set `Config.UseSeasons = false` to show your normal look instead.
+
+| Season | Window | Particles | Background |
+| --- | --- | --- | --- |
+| Winter | `12-01` to `02-28` (leap day included) | snow | `images/winter.jpeg` |
+| Spring | `03-01` to `05-31` | petals | `images/spring.jpeg` |
+| Summer | `06-01` to `08-31` | fireflies | `images/summer.jpeg` |
+| Autumn | `09-01` to `11-30` | leaves | `images/autumn.jpeg` |
+
 ### Theme options
 
-Each entry in `Config.Themes` supports:
+Holiday entries in `Config.Themes` and season entries in `Config.Seasons` support the same options:
 
 | Key | Description |
 | --- | --- |
@@ -113,7 +126,7 @@ Each entry in `Config.Themes` supports:
 | `easterDaysBefore` / `easterDaysAfter` | Easter only: days either side of Easter Sunday. |
 | `subtitle` | Replaces the brand subtitle. |
 | `seal` / `divider` | Symbols shown in the round seal and the divider. |
-| `particles` | `'snow'`, `'bats'`, `'petals'`, or `''` for none. |
+| `particles` | `'snow'`, `'bats'`, `'petals'`, `'leaves'`, `'fireflies'`, or `''` for none. |
 | `background` | Image path inside `html/` or a URL. Blank keeps the normal background. |
 | `backgroundDim` | Darkness overlay for this theme, `0` to `1`. |
 | `colors` | `accent`, `accent2` (progress bar gradient and highlights), `border`, `panel`, `panel2`, `text`, `muted`. |
@@ -165,7 +178,11 @@ rsg-loading/
         ├── background.jpeg
         ├── easter.jpeg
         ├── halloween.jpeg
-        └── christmas.jpeg
+        ├── christmas.jpeg
+        ├── winter.jpeg
+        ├── spring.jpeg
+        ├── summer.jpeg
+        └── autumn.jpeg
 ```
 
 ## Credits

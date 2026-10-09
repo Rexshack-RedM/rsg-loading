@@ -262,6 +262,8 @@ body.seasonal .brand-subtitle { color: var(--theme-accent); }
 
 .particle-snow   { color: #ffffff; text-shadow: 0 0 6px rgba(255,255,255,0.6); }
 .particle-petals { color: #f4c7e0; animation-name: particle-sway; }
+.particle-leaves { animation-name: particle-sway; }
+.particle-fireflies { color: #ffe98a; text-shadow: 0 0 8px #ffd34a, 0 0 16px #ffb347; animation-name: particle-glow; animation-direction: alternate; }
 .particle-bats   { top: auto; bottom: -40px; filter: grayscale(1) brightness(0.25); animation-name: particle-fly; }
 
 @keyframes particle-fall {
@@ -281,4 +283,10 @@ body.seasonal .brand-subtitle { color: var(--theme-accent); }
   50%  { transform: translate(-40px, -60vh) scaleX(1); }
   75%  { transform: translate(50px, -90vh) scaleX(-1); }
   100% { transform: translate(0, -120vh) scaleX(1); }
+}
+@keyframes particle-glow {
+  0%   { transform: translate(0, 0); opacity: 0.1; }
+  30%  { opacity: 0.9; }
+  60%  { transform: translate(40px, -30px); opacity: 0.3; }
+  100% { transform: translate(-30px, -70px); opacity: 0.9; }
 }
