@@ -7,7 +7,7 @@ lua54 'yes'
 name 'rsg-loading'
 author 'RexShack'
 description 'RSG RedM Loading Screen'
-version '2.0.0'
+version '3.0.0'
 
 loadscreen 'html/index.html'
 
@@ -17,7 +17,8 @@ files {
     'html/script.js',
     'html/locales/en.json',
     'html/config.json',
-    'html/images/*'
+    'html/images/*',
+    'config.lua'
 }
 
 loadscreen_manual_shutdown 'yes'

@@ -79,9 +79,185 @@ Promise.all([getJSON('locales/en.json'), getJSON('config.json')]).then(([loc, cf
   if (typeof cfg.tip_interval_seconds === 'number' && cfg.tip_interval_seconds > 0) {
     tipDelay = cfg.tip_interval_seconds * 1000;
   }
-  applyLocale(Object.assign({}, FALLBACK_TEXT, loc, cfg.text || {}));
-  applyBackground(cfg);
+  const text = Object.assign({}, FALLBACK_TEXT, loc, cfg.text || {});
+  loadLuaConfig().then((luaCfg) => {
+    const theme = pickTheme(luaCfg);
+    if (theme) {
+      if (theme.subtitle) text.brand_subtitle = theme.subtitle;
+      const tips = Array.isArray(theme.tips) ? theme.tips : [];
+      if (tips.length) text.tips = luaCfg.MergeTips === false ? tips : tips.concat(text.tips || []);
+      if (theme.background) cfg.background_image = theme.background;
+      if (typeof theme.backgroundDim === 'number') cfg.background_dim = theme.backgroundDim;
+      applyTheme(theme, luaCfg.Particles !== false);
+    }
+    applyLocale(text);
+    applyBackground(cfg);
+  });
 });
+
+/* ------------------------------------------------------------------ */
+/* Seasonal themes (configured in ../config.lua)                       */
+/* ------------------------------------------------------------------ */
+
+// Minimal Lua literal parser: handles `Config = {}` / `Config.A.B = value`
+// with strings, numbers, booleans, nil and nested tables. Comments ignored.
+function parseLuaConfig(src) {
+  const toks = [];
+  let i = 0;
+  while (i < src.length) {
+    const c = src[i];
+    if (/\s/.test(c)) { i++; continue; }
+    if (src.startsWith('--', i)) {
+      const m = src.slice(i).match(/^--\[(=*)\[/);
+      if (m) { const end = src.indexOf(']' + m[1] + ']', i); i = end < 0 ? src.length : end + m[1].length + 2; }
+      else { const nl = src.indexOf('\n', i); i = nl < 0 ? src.length : nl; }
+      continue;
+    }
+    if (c === '"' || c === "'") {
+      let j = i + 1, out = '';
+      while (j < src.length && src[j] !== c) {
+        if (src[j] === '\\') { j++; const e = src[j]; out += e === 'n' ? '\n' : e === 't' ? '\t' : e; }
+        else out += src[j];
+        j++;
+      }
+      toks.push({ t: 'str', v: out }); i = j + 1; continue;
+    }
+    const lb = src.slice(i).match(/^\[(=*)\[/);
+    if (lb) { const end = src.indexOf(']' + lb[1] + ']', i); toks.push({ t: 'str', v: src.slice(i + lb[0].length, end).replace(/^\n/, '') }); i = end + lb[1].length + 2; continue; }
+    const num = src.slice(i).match(/^-?(0x[0-9a-fA-F]+|\d+\.?\d*(e[+-]?\d+)?)/);
+    if (num && (c === '-' ? /[\d]/.test(src[i + 1]) : true) && /[\d-]/.test(c)) { toks.push({ t: 'num', v: Number(num[0]) }); i += num[0].length; continue; }
+    const id = src.slice(i).match(/^[A-Za-z_][A-Za-z0-9_]*/);
+    if (id) { toks.push({ t: 'id', v: id[0] }); i += id[0].length; continue; }
+    toks.push({ t: 'p', v: c }); i++;
+  }
+  let k = 0;
+  const peek = () => toks[k] || {};
+  const next = () => toks[k++] || {};
+  const isP = (v) => peek().t === 'p' && peek().v === v;
+  function value() {
+    const tk = next();
+    if (tk.t === 'str' || tk.t === 'num') return tk.v;
+    if (tk.t === 'id') return tk.v === 'true' ? true : tk.v === 'false' ? false : null;
+    if (tk.t === 'p' && tk.v === '{') {
+      const arr = [], obj = {}; let isObj = false;
+      while (!isP('}') && k < toks.length) {
+        if (peek().t === 'id' && toks[k + 1] && toks[k + 1].v === '=') { const key = next().v; next(); obj[key] = value(); isObj = true; }
+        else if (isP('[')) { next(); const key = value(); next(); next(); obj[key] = value(); isObj = true; }
+        else arr.push(value());
+        if (isP(',') || isP(';')) next();
+      }
+      next();
+      if (!isObj) return arr;
+      arr.forEach((v, n) => { obj[n + 1] = v; });
+      return obj;
+    }
+    return null;
+  }
+  const root = {};
+  while (k < toks.length) {
+    if (peek().t !== 'id') { next(); continue; }
+    const path = [next().v];
+    while (isP('.')) { next(); path.push(next().v); }
+    if (!isP('=')) continue;
+    next();
+    const v = value();
+    if (path[0] !== 'Config') continue;
+    let o = root;
+    for (let p = 1; p < path.length - 1; p++) o = o[path[p]] = o[path[p]] || {};
+    if (path.length === 1) Object.assign(root, v || {}); else o[path[path.length - 1]] = v;
+  }
+  return root;
+}
+
+function loadLuaConfig() {
+  return fetch('../config.lua')
+    .then((r) => r.text())
+    .then(parseLuaConfig)
+    .catch(() => ({}));
+}
+
+// Anonymous Gregorian algorithm
+function easterSunday(year) {
+  const a = year % 19, b = Math.floor(year / 100), c = year % 100;
+  const d = Math.floor(b / 4), e = b % 4, f = Math.floor((b + 8) / 25);
+  const g = Math.floor((b - f + 1) / 3), h = (19 * a + b - d - g + 15) % 30;
+  const i = Math.floor(c / 4), k = c % 4, l = (32 + 2 * e + 2 * i - h - k) % 7;
+  const m = Math.floor((a + 11 * h + 22 * l) / 451);
+  const month = Math.floor((h + l - 7 * m + 114) / 31);
+  const day = ((h + l - 7 * m + 114) % 31) + 1;
+  return new Date(year, month - 1, day);
+}
+
+function mmdd(str) {
+  const [m, d] = String(str || '').split('-').map(Number);
+  return m * 100 + d;
+}
+
+function themeActive(name, t, now) {
+  if (!t || t.enabled === false) return false;
+  const today = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+  if (name === 'easter' && !t.start) {
+    const day = 86400000;
+    const e = easterSunday(now.getFullYear()).getTime();
+    const from = e - (t.easterDaysBefore ?? 7) * day;
+    const to = e + (t.easterDaysAfter ?? 1) * day;
+    return today.getTime() >= from && today.getTime() <= to;
+  }
+  if (!t.start || !t.finish) return false;
+  const cur = (now.getMonth() + 1) * 100 + now.getDate();
+  const s = mmdd(t.start), f = mmdd(t.finish);
+  return s <= f ? cur >= s && cur <= f : cur >= s || cur <= f; // wraps new year
+}
+
+function pickTheme(cfg) {
+  const themes = cfg.Themes || {};
+  const mode = String(cfg.Theme || 'auto').toLowerCase();
+  if (mode === 'default' || mode === 'none') return null;
+  if (mode !== 'auto') return themes[mode] || null;
+  const now = new Date();
+  for (const name of Object.keys(themes)) {
+    if (themeActive(name, themes[name], now)) return themes[name];
+  }
+  return null;
+}
+
+function applyTheme(t, particlesOn) {
+  const c = t.colors || {};
+  const root = document.documentElement.style;
+  const set = (v, val) => { if (val) root.setProperty(v, val); };
+  set('--theme-accent', c.accent);
+  set('--theme-accent-2', c.accent2);
+  set('--rdr-gold-dim', c.border);
+  set('--rdr-panel', c.panel);
+  set('--rdr-panel-2', c.panel2);
+  set('--rdr-text', c.text);
+  set('--rdr-muted', c.muted);
+  document.body.classList.add('seasonal');
+  const seal = document.querySelector('.brand-seal');
+  const mark = document.querySelector('.divider .mark');
+  if (t.seal && seal) seal.textContent = t.seal;
+  if (t.divider && mark) mark.textContent = t.divider;
+  if (particlesOn && t.particles) startParticles(String(t.particles));
+}
+
+function startParticles(kind) {
+  const layer = document.getElementById('particles');
+  if (!layer) return;
+  const glyph = { snow: '❄', bats: '🦇', petals: '✿' }[kind];
+  if (!glyph) return;
+  const count = kind === 'snow' ? 45 : kind === 'bats' ? 14 : 28;
+  for (let n = 0; n < count; n++) {
+    const p = document.createElement('span');
+    p.className = 'particle particle-' + kind;
+    p.textContent = glyph;
+    p.style.left = Math.random() * 100 + 'vw';
+    p.style.fontSize = (kind === 'bats' ? 14 + Math.random() * 16 : 8 + Math.random() * 14) + 'px';
+    p.style.opacity = (0.35 + Math.random() * 0.55).toFixed(2);
+    p.style.animationDuration = (kind === 'bats' ? 7 + Math.random() * 8 : 9 + Math.random() * 12) + 's';
+    p.style.animationDelay = -Math.random() * 20 + 's';
+    layer.appendChild(p);
+  }
+}
 
 function updateClock() {
   const now = new Date();

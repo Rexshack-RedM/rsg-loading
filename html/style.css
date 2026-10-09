@@ -15,6 +15,8 @@
   --rdr-cost-over: #e0554f;
   --rdr-amber: #d9a441;
   --rdr-shadow: rgba(0, 0, 0, 0.85);
+  --theme-accent: #d8d8d8;
+  --theme-accent-2: #ffffff;
 }
 
 * { box-sizing: border-box; }
@@ -190,8 +192,8 @@ html, body {
   height: 100%;
   width: 0%;
   border-radius: 5px 0 0 5px;
-  background: linear-gradient(90deg, #d8d8d8, #ffffff);
-  box-shadow: 0 0 10px rgba(255, 255, 255, 0.35);
+  background: linear-gradient(90deg, var(--theme-accent), var(--theme-accent-2));
+  box-shadow: 0 0 10px color-mix(in srgb, var(--theme-accent) 45%, transparent);
   transition: width 0.35s ease;
 }
 
@@ -235,3 +237,48 @@ html, body {
 }
 
 .footer-sep { color: var(--rdr-gold-dim); }
+
+/* ---------------- Seasonal themes (config.lua) ---------------- */
+body.seasonal .brand-seal { color: var(--theme-accent); border-color: var(--theme-accent); }
+body.seasonal .divider .mark { color: var(--theme-accent); }
+body.seasonal .brand-subtitle { color: var(--theme-accent); }
+
+#particles {
+  position: fixed;
+  inset: 0;
+  z-index: 4;
+  pointer-events: none;
+  overflow: hidden;
+}
+
+.particle {
+  position: absolute;
+  top: -40px;
+  animation-name: particle-fall;
+  animation-timing-function: linear;
+  animation-iteration-count: infinite;
+  will-change: transform;
+}
+
+.particle-snow   { color: #ffffff; text-shadow: 0 0 6px rgba(255,255,255,0.6); }
+.particle-petals { color: #f4c7e0; animation-name: particle-sway; }
+.particle-bats   { top: auto; bottom: -40px; filter: grayscale(1) brightness(0.25); animation-name: particle-fly; }
+
+@keyframes particle-fall {
+  0%   { transform: translate(0, 0) rotate(0deg); }
+  100% { transform: translate(40px, 110vh) rotate(360deg); }
+}
+@keyframes particle-sway {
+  0%   { transform: translate(0, 0) rotate(0deg); }
+  25%  { transform: translate(30px, 28vh) rotate(90deg); }
+  50%  { transform: translate(-20px, 55vh) rotate(180deg); }
+  75%  { transform: translate(25px, 82vh) rotate(270deg); }
+  100% { transform: translate(0, 110vh) rotate(360deg); }
+}
+@keyframes particle-fly {
+  0%   { transform: translate(0, 0) scaleX(1); }
+  25%  { transform: translate(60px, -30vh) scaleX(-1); }
+  50%  { transform: translate(-40px, -60vh) scaleX(1); }
+  75%  { transform: translate(50px, -90vh) scaleX(-1); }
+  100% { transform: translate(0, -120vh) scaleX(1); }
+}
