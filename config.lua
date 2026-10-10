@@ -11,6 +11,15 @@
 
 Config = {}
 
+-- Loading screen language. Must match a file in locales/ (en, de, el, es, fr, ja, nl, pl, pt-br, ro).
+-- The loading screen runs before ox_lib, so it cannot read the ox:locale convar; set it here.
+-- Server console messages use ox_lib's ox:locale convar as normal.
+-- All text (title, subtitles, tips) lives in locales/<lang>.json:
+--   ui_tip_1, ui_tip_2 ...                 normal tips (add more by adding numbered keys)
+--   theme_<name>_subtitle                  subtitle for a holiday/season theme
+--   theme_<name>_tip_1, _tip_2 ...         tips for a holiday/season theme
+Config.Locale = 'en'
+
 -- 'auto'      = pick the theme whose date window contains today
 -- 'default'   = never use a seasonal theme
 -- 'easter' / 'halloween' / 'christmas' = force that holiday theme all year (handy for testing)
@@ -29,7 +38,6 @@ Config.Themes = {
         easterDaysBefore = 7,
         easterDaysAfter  = 1,
 
-        subtitle   = 'H A P P Y  E A S T E R',
         seal       = '✿',
         divider    = '❀',
         particles  = 'petals',
@@ -44,10 +52,6 @@ Config.Themes = {
             text     = '#fff8fc',
             muted    = '#c8b6c6',
         },
-        tips = {
-            'Tip: Keep your eyes peeled for hidden eggs around Valentine.',
-            'Tip: Spring has sprung on the frontier.',
-        },
     },
 
     halloween = {
@@ -55,7 +59,6 @@ Config.Themes = {
         start   = '10-15',
         finish  = '11-01',
 
-        subtitle   = 'T H E  D E A D  R I D E  T O N I G H T',
         seal       = '☠',
         divider    = '✝',
         particles  = 'bats',
@@ -70,10 +73,6 @@ Config.Themes = {
             text     = '#fff1e6',
             muted    = '#c59a7c',
         },
-        tips = {
-            'Tip: Something stirs in the swamps of Lemoyne after dark...',
-            'Tip: Never ride alone on All Hallows Eve.',
-        },
     },
 
     christmas = {
@@ -81,7 +80,6 @@ Config.Themes = {
         start   = '12-01',
         finish  = '12-31',
 
-        subtitle   = 'M E R R Y  C H R I S T M A S',
         seal       = '❄',
         divider    = '✦',
         particles  = 'snow',
@@ -95,10 +93,6 @@ Config.Themes = {
             panel2   = '#13241b',
             text     = '#ffffff',
             muted    = '#a9c4b5',
-        },
-        tips = {
-            'Tip: Wrap up warm, the mountains are freezing this time of year.',
-            'Tip: Merry Christmas from all the staff!',
         },
     },
 }
@@ -121,7 +115,6 @@ Config.Seasons = {
         start   = '12-01',
         finish  = '02-28',       -- wraps the new year (Feb 29 also counts)
 
-        subtitle      = 'T H E  C O L D  W E S T',
         seal          = '❄',
         divider       = '✦',
         particles     = 'snow',
@@ -136,9 +129,6 @@ Config.Seasons = {
             text    = '#f4f8fc',
             muted   = '#a3b4c4',
         },
-        tips = {
-            'Tip: Dress warmly before heading into the mountains.',
-        },
     },
 
     spring = {
@@ -146,7 +136,6 @@ Config.Seasons = {
         start   = '03-01',
         finish  = '05-31',
 
-        subtitle      = 'A  N E W  S E A S O N',
         seal          = '❀',
         divider       = '✿',
         particles     = 'petals',
@@ -161,9 +150,6 @@ Config.Seasons = {
             text    = '#f6fff0',
             muted   = '#aec6a2',
         },
-        tips = {
-            'Tip: Spring rains bring the best hunting on the plains.',
-        },
     },
 
     summer = {
@@ -171,7 +157,6 @@ Config.Seasons = {
         start   = '06-01',
         finish  = '08-31',
 
-        subtitle      = 'S U N  S C O R C H E D  F R O N T I E R',
         seal          = '☀',
         divider       = '✦',
         particles     = 'fireflies',
@@ -186,9 +171,6 @@ Config.Seasons = {
             text    = '#fff6e8',
             muted   = '#cfae8a',
         },
-        tips = {
-            'Tip: Carry plenty of water when crossing the desert.',
-        },
     },
 
     autumn = {
@@ -196,7 +178,6 @@ Config.Seasons = {
         start   = '09-01',
         finish  = '11-30',
 
-        subtitle      = 'T H E  L E A V E S  A R E  F A L L I N G',
         seal          = '❦',
         divider       = '✦',
         particles     = 'leaves',
@@ -210,9 +191,6 @@ Config.Seasons = {
             panel2  = '#22140a',
             text    = '#fff3e6',
             muted   = '#c9a585',
-        },
-        tips = {
-            'Tip: Stock up on supplies before winter sets in.',
         },
     },
 }

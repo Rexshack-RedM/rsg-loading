@@ -29,24 +29,18 @@ A clean, configurable loading screen for RedM servers running the RSG Framework.
 
 > Only one resource can provide a `loadscreen`. Remove or stop any other loading screen resource.
 
+## Requirements
+
+- [ox_lib](https://github.com/overextended/ox_lib) (used for locales)
+
 ## Configuration
 
-All settings live in `html/config.json`:
+Visual settings live in `html/config.json`:
 
 ```json
 {
   "background_image": "images/background.jpeg",
   "background_dim": 0.45,
-  "text": {
-    "brand_title": "RSG Framework",
-    "brand_subtitle": "R E D E M P T I O N  A W A I T S",
-    "status_loading": "Saddling up…",
-    "status_ready": "Ready.",
-    "footer_resource_name": "rsg-loading",
-    "tips": [
-      "Tip: Community is everything, be part of it."
-    ]
-  },
   "tip_interval_seconds": 5
 }
 ```
@@ -55,23 +49,29 @@ All settings live in `html/config.json`:
 | --- | --- |
 | `background_image` | Path relative to `html/`, or a full URL. Falls back to a dark gradient if missing. |
 | `background_dim` | Darkness overlay on the background, `0` (none) to `1` (black). |
-| `text.brand_title` | Main heading. |
-| `text.brand_subtitle` | Line under the heading. |
-| `text.status_loading` | Status text while loading. |
-| `text.status_ready` | Status text when loading completes. |
-| `text.footer_resource_name` | Text shown in the footer. |
-| `text.tips` | Array of tips rotated during loading. |
 | `tip_interval_seconds` | Seconds between tip changes. |
 
-### Text priority
+## Languages
 
-Text is merged in this order (later wins):
+All text lives in the ox_lib locale files in `locales/`. Included: `en`, `de`, `el`, `es`, `fr`, `ja`, `nl`, `pl`, `pt-br`, `ro`.
 
-1. Built-in fallback in `script.js`
-2. `html/locales/en.json`
-3. The `text` block in `html/config.json`
+- **Loading screen language:** set `Config.Locale` in `config.lua` (the loading screen runs before ox_lib, so it can't read the `ox:locale` convar).
+- **Server console language:** follows ox_lib's `setr ox:locale "de"` convar as usual.
 
-For a simple setup, just edit `config.json`. Use `locales/en.json` as your base language file and leave keys out of `config.json` if you want the locale to apply.
+Any key missing from a language falls back to `en.json`.
+
+| Key | Description |
+| --- | --- |
+| `ui_brand_title` | Main heading. |
+| `ui_brand_subtitle` | Line under the heading. |
+| `ui_status_loading` / `ui_status_ready` | Status text while loading / when done. |
+| `ui_footer_resource_name` | Text shown in the footer. |
+| `ui_tip_1`, `ui_tip_2` ... | Tips rotated during loading. Add more by adding the next number. |
+| `theme_<name>_subtitle` | Subtitle for a holiday or season theme (e.g. `theme_halloween_subtitle`). |
+| `theme_<name>_tip_1` ... | Tips for a holiday or season theme. |
+| `sv_*` | Server version checker messages. |
+
+To add a language, copy `en.json` to `<code>.json` and translate the values.
 
 ### Changing the background
 
@@ -124,13 +124,13 @@ Holiday entries in `Config.Themes` and season entries in `Config.Seasons` suppor
 | `enabled` | Set `false` to skip this theme in `auto` mode. |
 | `start` / `finish` | Date window in `MM-DD`. |
 | `easterDaysBefore` / `easterDaysAfter` | Easter only: days either side of Easter Sunday. |
-| `subtitle` | Replaces the brand subtitle. |
 | `seal` / `divider` | Symbols shown in the round seal and the divider. |
 | `particles` | `'snow'`, `'bats'`, `'petals'`, `'leaves'`, `'fireflies'`, or `''` for none. |
 | `background` | Image path inside `html/` or a URL. Blank keeps the normal background. |
 | `backgroundDim` | Darkness overlay for this theme, `0` to `1`. |
 | `colors` | `accent`, `accent2` (progress bar gradient and highlights), `border`, `panel`, `panel2`, `text`, `muted`. |
-| `tips` | Seasonal tips. |
+
+Theme subtitles and tips are set in `locales/<lang>.json` (see Languages).
 
 To use your own seasonal artwork, drop the image into `html/images/` and change that theme's `background` path.
 
@@ -166,14 +166,17 @@ Serve the resource folder with a local web server so `fetch` can read the config
 ```
 rsg-loading/
 ├── fxmanifest.lua
-├── config.lua          # seasonal themes
+├── config.lua          # language + seasonal themes
+├── locales/            # ox_lib locale files (all text)
+│   ├── en.json
+│   └── de.json, el.json, es.json, fr.json, ja.json, nl.json, pl.json, pt-br.json, ro.json
+├── server/
+│   └── versionchecker.lua
 └── html/
     ├── index.html
     ├── style.css
     ├── script.js
     ├── config.json
-    ├── locales/
-    │   └── en.json
     └── images/
         ├── background.jpeg
         ├── easter.jpeg

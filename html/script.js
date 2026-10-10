@@ -7,7 +7,7 @@ const brandTitle = document.getElementById('brandTitle');
 const brandSubtitle = document.getElementById('brandSubtitle');
 const footerResourceName = document.getElementById('footerResourceName');
 
-// UI text: defaults in locales/en.json, overridden by the "text" block in config.json.
+// UI text comes from the ox_lib locale files in ../locales/<lang>.json (language set by Config.Locale in config.lua).
 let locale = {
   brand_title: '',
   brand_subtitle: '',
@@ -63,29 +63,46 @@ function applyBackground(cfg) {
   img.src = cfg.background_image;
 }
 
-const FALLBACK_TEXT = {
-  brand_title: 'Rex Shack',
-  brand_subtitle: 'REDEMPTION AWAITS',
-  status_loading: 'Loading...',
-  status_ready: 'Ready.',
-  footer_resource_name: 'rsg-loading',
-  tips: ['Loading...']
-};
-
 const getJSON = (url) => fetch(url).then((r) => r.json()).catch(() => ({}));
 
-// Load locale first, then config.json. Any keys in config.json "text" override the locale.
-Promise.all([getJSON('locales/en.json'), getJSON('config.json')]).then(([loc, cfg]) => {
+// Collect numbered keys: prefix_1, prefix_2 ... (stops at the first gap)
+function numbered(dict, prefix) {
+  const out = [];
+  for (let n = 1; dict[prefix + n] !== undefined; n++) out.push(dict[prefix + n]);
+  return out;
+}
+
+// Load the selected ox_lib locale, with any missing keys filled from en.json.
+function loadLocale(lang) {
+  const code = String(lang || 'en').toLowerCase();
+  const reqs = [getJSON('../locales/en.json')];
+  if (code !== 'en') reqs.push(getJSON('../locales/' + code + '.json'));
+  return Promise.all(reqs).then(([en, sel]) => Object.assign({}, en, sel || {}));
+}
+
+Promise.all([getJSON('config.json'), loadLuaConfig()]).then(([cfg, luaCfg]) => {
   if (typeof cfg.tip_interval_seconds === 'number' && cfg.tip_interval_seconds > 0) {
     tipDelay = cfg.tip_interval_seconds * 1000;
   }
-  const text = Object.assign({}, FALLBACK_TEXT, loc, cfg.text || {});
-  loadLuaConfig().then((luaCfg) => {
-    const theme = pickTheme(luaCfg);
-    if (theme) {
-      if (theme.subtitle) text.brand_subtitle = theme.subtitle;
-      const tips = Array.isArray(theme.tips) ? theme.tips : [];
-      if (tips.length) text.tips = luaCfg.MergeTips === false ? tips : tips.concat(text.tips || []);
+  loadLocale(luaCfg.Locale).then((L) => {
+    const lang = String(luaCfg.Locale || 'en');
+    document.documentElement.lang = lang;
+    document.title = L.ui_page_title || '';
+    const text = {
+      brand_title: L.ui_brand_title || '',
+      brand_subtitle: L.ui_brand_subtitle || '',
+      status_loading: L.ui_status_loading || '',
+      status_ready: L.ui_status_ready || '',
+      footer_resource_name: L.ui_footer_resource_name || '',
+      tips: numbered(L, 'ui_tip_')
+    };
+    const picked = pickTheme(luaCfg);
+    if (picked) {
+      const { name, theme } = picked;
+      const sub = L['theme_' + name + '_subtitle'];
+      if (sub) text.brand_subtitle = sub;
+      const tips = numbered(L, 'theme_' + name + '_tip_');
+      if (tips.length) text.tips = luaCfg.MergeTips === false ? tips : tips.concat(text.tips);
       if (theme.background) cfg.background_image = theme.background;
       if (typeof theme.backgroundDim === 'number') cfg.background_dim = theme.backgroundDim;
       applyTheme(theme, luaCfg.Particles !== false);
@@ -215,14 +232,17 @@ function pickTheme(cfg) {
   const seasons = cfg.Seasons || {};
   const mode = String(cfg.Theme || 'auto').toLowerCase();
   if (mode === 'default' || mode === 'none') return null;
-  if (mode !== 'auto') return themes[mode] || seasons[mode] || null;
+  if (mode !== 'auto') {
+    const t = themes[mode] || seasons[mode];
+    return t ? { name: mode, theme: t } : null;
+  }
   const now = new Date();
   for (const name of Object.keys(themes)) {
-    if (themeActive(name, themes[name], now)) return themes[name];
+    if (themeActive(name, themes[name], now)) return { name, theme: themes[name] };
   }
   if (cfg.UseSeasons === false) return null;
   for (const name of Object.keys(seasons)) {
-    if (themeActive(name, seasons[name], now)) return seasons[name];
+    if (themeActive(name, seasons[name], now)) return { name, theme: seasons[name] };
   }
   return null;
 }

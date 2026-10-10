@@ -7,9 +7,10 @@ lua54 'yes'
 name 'rsg-loading'
 author 'RexShack'
 description 'RSG RedM Loading Screen'
-version '3.0.1'
+version '3.0.2'
 
 server_scripts {
+    '@ox_lib/init.lua',
     'server/versionchecker.lua'
 }
 
@@ -19,10 +20,16 @@ files {
     'html/index.html',
     'html/style.css',
     'html/script.js',
-    'html/locales/en.json',
+    'locales/*.json',
     'html/config.json',
     'html/images/*',
     'config.lua'
 }
 
 loadscreen_manual_shutdown 'yes'
+
+dependencies {
+    'ox_lib'
+}
+
+ox_lib 'locale'
