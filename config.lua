@@ -22,11 +22,11 @@ Config.Locale = 'en'
 
 -- 'auto'      = pick the theme whose date window contains today
 -- 'default'   = never use a seasonal theme
--- 'easter' / 'halloween' / 'christmas' = force that holiday theme all year (handy for testing)
+-- 'easter' / 'halloween' / 'christmas' / 'newyear' = force that holiday theme all year (handy for testing)
 -- 'winter' / 'spring' / 'summer' / 'autumn' = force that season theme all year
 Config.Theme = 'auto'
 
--- Particle effects (snow, bats, petals, leaves, fireflies). Set false to disable on all themes.
+-- Particle effects (snow, bats, petals, leaves, fireflies, fireworks). Set false to disable on all themes.
 Config.Particles = true
 
 Config.Themes = {
@@ -78,7 +78,7 @@ Config.Themes = {
     christmas = {
         enabled = true,
         start   = '12-01',
-        finish  = '12-31',
+        finish  = '12-30',
 
         seal       = '❄',
         divider    = '✦',
@@ -93,6 +93,27 @@ Config.Themes = {
             panel2   = '#13241b',
             text     = '#ffffff',
             muted    = '#a9c4b5',
+        },
+    },
+
+    newyear = {
+        enabled = true,
+        start   = '12-31',
+        finish  = '01-02',
+
+        seal       = '✷',
+        divider    = '✧',
+        particles  = 'fireworks',
+        background = 'images/newyear.jpeg', -- path inside html/ (or a URL). Blank = keep the normal background
+        backgroundDim = 0.45,                -- 0 = full brightness, 1 = black
+        colors = {
+            accent   = '#ffd86b',
+            accent2  = '#ff5e8a',
+            border   = '#6b5a2e',
+            panel    = '#0a0b14',
+            panel2   = '#141628',
+            text     = '#fffaf0',
+            muted    = '#bfb8a3',
         },
     },
 }

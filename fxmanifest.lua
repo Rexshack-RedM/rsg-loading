@@ -7,7 +7,7 @@ lua54 'yes'
 name 'rsg-loading'
 author 'RexShack'
 description 'RSG RedM Loading Screen'
-version '3.0.2'
+version '3.0.3'
 
 server_scripts {
     '@ox_lib/init.lua',

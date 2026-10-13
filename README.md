@@ -82,7 +82,7 @@ Drop your image into `html/images/` and update `background_image` in `config.jso
 Seasonal themes are configured in `config.lua` in the resource root. The loading screen reads this file directly, because it shows before any Lua scripts run. Keep it to plain values (strings, numbers, booleans and tables); functions and logic are not supported.
 
 ```lua
-Config.Theme     = 'auto'   -- 'auto', 'default', 'easter', 'halloween' or 'christmas'
+Config.Theme     = 'auto'   -- 'auto', 'default', 'easter', 'halloween', 'christmas' or 'newyear'
 Config.Particles = true     -- falling snow / bats / petals
 Config.MergeTips = true     -- true = add seasonal tips to your normal tips, false = replace them
 ```
@@ -91,7 +91,7 @@ Config.MergeTips = true     -- true = add seasonal tips to your normal tips, fal
 | --- | --- |
 | `'auto'` | Uses the holiday theme whose date window contains today; if none, the matching season theme (when `Config.UseSeasons = true`); otherwise the normal look. |
 | `'default'` | Never uses a seasonal theme. |
-| `'easter'` / `'halloween'` / `'christmas'` | Forces that holiday theme all year. Useful for testing. |
+| `'easter'` / `'halloween'` / `'christmas'` / `'newyear'` | Forces that holiday theme all year. Useful for testing. |
 | `'winter'` / `'spring'` / `'summer'` / `'autumn'` | Forces that season theme all year. |
 
 ### Default date windows
@@ -100,7 +100,8 @@ Config.MergeTips = true     -- true = add seasonal tips to your normal tips, fal
 | --- | --- | --- |
 | Easter | 7 days before Easter Sunday to 1 day after (calculated each year) | `images/easter.jpeg` |
 | Halloween | `10-15` to `11-01` | `images/halloween.jpeg` |
-| Christmas | `12-01` to `12-31` | `images/christmas.jpeg` |
+| Christmas | `12-01` to `12-30` | `images/christmas.jpeg` |
+| New Year | `12-31` to `01-02` | normal background |
 
 Dates use the player's local clock in `MM-DD` format. A window can wrap the new year, e.g. `start = '12-01', finish = '01-06'`.
 
@@ -125,7 +126,7 @@ Holiday entries in `Config.Themes` and season entries in `Config.Seasons` suppor
 | `start` / `finish` | Date window in `MM-DD`. |
 | `easterDaysBefore` / `easterDaysAfter` | Easter only: days either side of Easter Sunday. |
 | `seal` / `divider` | Symbols shown in the round seal and the divider. |
-| `particles` | `'snow'`, `'bats'`, `'petals'`, `'leaves'`, `'fireflies'`, or `''` for none. |
+| `particles` | `'snow'`, `'bats'`, `'petals'`, `'leaves'`, `'fireflies'`, `'fireworks'`, or `''` for none. |
 | `background` | Image path inside `html/` or a URL. Blank keeps the normal background. |
 | `backgroundDim` | Darkness overlay for this theme, `0` to `1`. |
 | `colors` | `accent`, `accent2` (progress bar gradient and highlights), `border`, `panel`, `panel2`, `text`, `muted`. |

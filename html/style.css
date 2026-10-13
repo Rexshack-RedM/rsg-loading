@@ -290,3 +290,33 @@ body.seasonal .brand-subtitle { color: var(--theme-accent); }
   60%  { transform: translate(40px, -30px); opacity: 0.3; }
   100% { transform: translate(-30px, -70px); opacity: 0.9; }
 }
+
+/* New Year fireworks */
+.fw-rocket {
+  position: absolute;
+  bottom: 0;
+  width: 3px;
+  height: 14px;
+  border-radius: 2px;
+  opacity: 0.9;
+  box-shadow: 0 0 8px currentColor;
+  animation: fw-rise 0.9s ease-out forwards;
+}
+.fw-spark {
+  position: absolute;
+  width: 4px;
+  height: 4px;
+  margin: -2px 0 0 -2px;
+  border-radius: 50%;
+  animation: fw-explode 1.6s cubic-bezier(0.15, 0.7, 0.3, 1) forwards;
+  will-change: transform, opacity;
+}
+@keyframes fw-rise {
+  0%   { transform: translateY(0); opacity: 1; }
+  100% { transform: translateY(calc(var(--fw-rise) * -1)); opacity: 0.6; }
+}
+@keyframes fw-explode {
+  0%   { transform: translate(0, 0) scale(1.2); opacity: 1; }
+  70%  { opacity: 0.9; }
+  100% { transform: translate(var(--fw-x), calc(var(--fw-y) + 40px)) scale(0.3); opacity: 0; }
+}

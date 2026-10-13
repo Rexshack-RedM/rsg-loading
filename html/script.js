@@ -269,6 +269,7 @@ function applyTheme(t, particlesOn) {
 function startParticles(kind) {
   const layer = document.getElementById('particles');
   if (!layer) return;
+  if (kind === 'fireworks') return startFireworks(layer);
   const glyph = { snow: '❄', bats: '🦇', petals: '✿', leaves: '❦', fireflies: '●' }[kind];
   if (!glyph) return;
   const count = { snow: 45, bats: 14, petals: 28, leaves: 30, fireflies: 35 }[kind];
@@ -285,6 +286,46 @@ function startParticles(kind) {
     p.style.animationDelay = -Math.random() * 20 + 's';
     layer.appendChild(p);
   }
+}
+
+function startFireworks(layer) {
+  const colors = ['#ffd86b', '#ff5e8a', '#6bd5ff', '#b98bff', '#7dff9a', '#ffffff', '#ff9e4a'];
+  function burst() {
+    const x = 10 + Math.random() * 80;   // vw
+    const y = 10 + Math.random() * 45;   // vh (upper half of screen)
+    const color = colors[Math.floor(Math.random() * colors.length)];
+    const rocket = document.createElement('span');
+    rocket.className = 'fw-rocket';
+    rocket.style.left = x + 'vw';
+    rocket.style.setProperty('--fw-rise', (100 - y) + 'vh');
+    rocket.style.background = color;
+    layer.appendChild(rocket);
+    setTimeout(() => {
+      rocket.remove();
+      const sparks = 26 + Math.floor(Math.random() * 18);
+      const radius = 70 + Math.random() * 90;
+      for (let n = 0; n < sparks; n++) {
+        const a = (n / sparks) * Math.PI * 2 + Math.random() * 0.2;
+        const r = radius * (0.75 + Math.random() * 0.25);
+        const s = document.createElement('span');
+        s.className = 'fw-spark';
+        s.style.left = x + 'vw';
+        s.style.top = y + 'vh';
+        s.style.background = color;
+        s.style.boxShadow = `0 0 6px ${color}, 0 0 12px ${color}`;
+        s.style.setProperty('--fw-x', Math.cos(a) * r + 'px');
+        s.style.setProperty('--fw-y', Math.sin(a) * r + 'px');
+        layer.appendChild(s);
+        setTimeout(() => s.remove(), 1700);
+      }
+    }, 900);
+  }
+  burst();
+  setInterval(() => {
+    if (document.hidden) return;
+    burst();
+    if (Math.random() < 0.4) setTimeout(burst, 250 + Math.random() * 400);
+  }, 900 + Math.random() * 600);
 }
 
 function updateClock() {
